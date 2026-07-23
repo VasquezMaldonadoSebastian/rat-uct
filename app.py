@@ -10,6 +10,8 @@ Uso:
     http://localhost:8000/docs   # Documentación OpenAPI interactiva
 """
 
+__version__ = "1.1.0"
+
 import os
 from contextlib import asynccontextmanager
 
@@ -28,6 +30,20 @@ from routes.brechas import router as brechas_router
 from routes.arsop import router as arsop_router
 from routes.dpa import router as dpa_router
 from routes.fases import router as fases_router
+
+# ─── V1 Routers ──────────────────────────────────────────────────────────────
+from routes.v1.actividades import router as actividades_v1_router
+from routes.v1.areas import router as areas_v1_router
+from routes.v1.procesos import router as procesos_v1_router
+from routes.v1.encargados import router as encargados_v1_router
+from routes.v1.reportes import router as reportes_v1_router
+from routes.v1.eipd import router as eipd_v1_router
+from routes.v1.brechas import router as brechas_v1_router
+from routes.v1.arsop import router as arsop_v1_router
+from routes.v1.dpa import router as dpa_v1_router
+from routes.v1.fases import router as fases_v1_router
+
+from middleware.logging_middleware import setup_logging, RequestLogMiddleware
 
 
 @asynccontextmanager
@@ -55,6 +71,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+setup_logging()
+app.add_middleware(RequestLogMiddleware)
+
 # ─── Registrar routers ──────────────────────────────────────────────────────
 app.include_router(actividades_router)
 app.include_router(areas_router)
@@ -66,6 +85,18 @@ app.include_router(brechas_router)
 app.include_router(arsop_router)
 app.include_router(dpa_router)
 app.include_router(fases_router)
+
+# ─── V1 Routers ──────────────────────────────────────────────────────────────
+app.include_router(actividades_v1_router)
+app.include_router(areas_v1_router)
+app.include_router(procesos_v1_router)
+app.include_router(encargados_v1_router)
+app.include_router(reportes_v1_router)
+app.include_router(eipd_v1_router)
+app.include_router(brechas_v1_router)
+app.include_router(arsop_v1_router)
+app.include_router(dpa_v1_router)
+app.include_router(fases_v1_router)
 
 # ─── Servir frontend estático (producción) ──────────────────────────────────
 # En producción (Fly.io / Docker), la carpeta static/ contiene el build de React.
