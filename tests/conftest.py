@@ -151,6 +151,11 @@ def _seed_data(conn):
 
 def _reset_db():
     """Elimina todo y recrea esquema + seed."""
+    # Drop child tables first (FK constraints)
+    _raw_conn.execute("DROP TABLE IF EXISTS taxonomia_asignaciones")
+    _raw_conn.execute("DROP TABLE IF EXISTS categorias_datos_catalog")
+    _raw_conn.execute("DROP TABLE IF EXISTS finalidades_catalog")
+    _raw_conn.execute("DROP TABLE IF EXISTS bases_licitud_catalog")
     _raw_conn.execute("DROP TABLE IF EXISTS actividades")
     _raw_conn.execute("DROP TABLE IF EXISTS areas")
     _raw_conn.execute("DROP TABLE IF EXISTS procesos")

@@ -280,3 +280,57 @@ class ArsopOut(BaseModel):
     fecha_respuesta: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+
+# ─── Taxonomía de Datos (Fides) ──────────────────────────────────────────────
+
+class CategoriaDatoCreate(BaseModel):
+    nombre: str
+    descripcion: str = ""
+    tipo_dato: str = "personal"
+
+
+class CategoriaDatoOut(BaseModel):
+    id: int
+    nombre: str
+    descripcion: str
+    tipo_dato: str
+
+
+class FinalidadCreate(BaseModel):
+    nombre: str
+    descripcion: str = ""
+
+
+class FinalidadOut(BaseModel):
+    id: int
+    nombre: str
+    descripcion: str
+
+
+class BaseLicitudCreate(BaseModel):
+    nombre: str
+    descripcion: str = ""
+    referencia_legal: str = "Ley 21.719"
+
+
+class BaseLicitudOut(BaseModel):
+    id: int
+    nombre: str
+    descripcion: str
+    referencia_legal: str
+
+
+class TaxonomiaAsignacionCreate(BaseModel):
+    actividad_id: int
+    categoria_id: int
+    finalidad_id: int
+    base_id: int
+
+
+class TaxonomiaAsignacionOut(BaseModel):
+    id: int
+    actividad_id: int
+    categoria_id: int
+    finalidad_id: int
+    base_id: int

@@ -49,7 +49,11 @@ def init_db(conn=None):
       5. bitacora — Trazabilidad de cambios
       6. eipd — Evaluaciones de Impacto (4 pasos)
       7. brechas — Incidentes de seguridad
-      |      8. solicitudes_arsop — Derechos ARSOP
+      |  8. solicitudes_arsop — Derechos ARSOP
+     |  9. categorias_datos_catalog — Catálogo Fides de categorías de datos personales
+     | 10. finalidades_catalog — Catálogo de finalidades de tratamiento
+     | 11. bases_licitud_catalog — Catálogo de bases de licitud
+     | 12. taxonomia_asignaciones — Puente entre actividad y su taxonomía
 
     Retorna la conexión DuckDB activa."""
     if conn is None:
@@ -204,6 +208,93 @@ def init_db(conn=None):
     """)
 
     print("✅ Esquema inicializado correctamente")
+
+    # ─── Catalogos de Taxonomía de Datos (Fides) ─────────────────────────────
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS categorias_datos_catalog (
+            id INTEGER PRIMARY KEY DEFAULT nextval('seq_actividades'),
+            nombre VARCHAR NOT NULL UNIQUE,
+            descripcion VARCHAR,
+            tipo_dato VARCHAR DEFAULT 'personal'  -- personal, sensible, financiero, biométrico
+        );
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS finalidades_catalog (
+            id INTEGER PRIMARY KEY DEFAULT nextval('seq_actividades'),
+            nombre VARCHAR NOT NULL UNIQUE,
+            descripcion VARCHAR
+        );
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS bases_licitud_catalog (
+            id INTEGER PRIMARY KEY DEFAULT nextval('seq_actividades'),
+            nombre VARCHAR NOT NULL UNIQUE,
+            descripcion VARCHAR,
+            referencia_legal VARCHAR DEFAULT 'Ley 21.719'
+        );
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS taxonomia_asignaciones (
+            id INTEGER PRIMARY KEY DEFAULT nextval('seq_actividades'),
+            actividad_id INTEGER NOT NULL,
+            categoria_id INTEGER,
+            finalidad_id INTEGER,
+            base_id INTEGER,
+            FOREIGN KEY (actividad_id) REFERENCES actividades(id),
+            FOREIGN KEY (categoria_id) REFERENCES categorias_datos_catalog(id),
+            FOREIGN KEY (finalidad_id) REFERENCES finalidades_catalog(id),
+            FOREIGN KEY (base_id) REFERENCES bases_licitud_catalog(id)
+        );
+    """)
+
+    # Seed datos de ejemplo (solo si tablas vacías)
+    if conn.execute("SELECT count(*) FROM categorias_datos_catalog").fetchone()[0] == 0:
+        conn.executemany(
+            "INSERT INTO categorias_datos_catalog (nombre, descripcion, tipo_dato) VALUES (?, ?, ?)",
+            [
+                ("Nombre", "Nombres y apellidos del titular", "personal"),
+                ("RUT", "Rol Único Tributario / RUN del titular", "personal"),
+                ("Dirección", "Domicilio particular del titular", "personal"),
+                ("Correo electrónico", "Dirección de correo electrónico personal", "personal"),
+                ("Teléfono", "Número de teléfono particular o móvil", "personal"),
+                ("Salud", "Datos relativos a la salud física o mental", "sensible"),
+                ("Biométricos", "Datos biométricos: huella, rostro, iris", "biométrico"),
+                ("Datos financieros", "Ingresos, deudas, cuentas bancarias, historial crediticio", "financiero"),
+            ]
+        )
+        print("  ↪ seed: categorias_datos_catalog (8 registros)")
+
+    if conn.execute("SELECT count(*) FROM finalidades_catalog").fetchone()[0] == 0:
+        conn.executemany(
+            "INSERT INTO finalidades_catalog (nombre, descripcion) VALUES (?, ?)",
+            [
+                ("Gestión académica", "Procesos de admisión, matrícula, registro curricular y titulación"),
+                ("Investigación", "Proyectos de investigación científica y académica"),
+                ("Facturación", "Emisión de facturas, cobros y pagos"),
+                ("Gestión de Personas", "Administración de personal, remuneraciones y beneficios"),
+                ("Comunicaciones", "Comunicaciones institucionales y contacto con la comunidad"),
+                ("Seguridad", "Videovigilancia, control de acceso y seguridad de instalaciones"),
+            ]
+        )
+        print("  ↪ seed: finalidades_catalog (6 registros)")
+
+    if conn.execute("SELECT count(*) FROM bases_licitud_catalog").fetchone()[0] == 0:
+        conn.executemany(
+            "INSERT INTO bases_licitud_catalog (nombre, descripcion, referencia_legal) VALUES (?, ?, ?)",
+            [
+                ("Consentimiento", "El titular ha dado consentimiento explícito para el tratamiento", "Ley 21.719 Art. 12"),
+                ("Interés legítimo", "Tratamiento necesario para satisfacer intereses legítimos del responsable", "Ley 21.719 Art. 13"),
+                ("Obligación legal", "Tratamiento necesario para cumplir una obligación legal aplicable", "Ley 21.719 Art. 14"),
+                ("Ejecución de contrato", "Tratamiento necesario para la ejecución de un contrato", "Ley 21.719 Art. 15"),
+                ("Interés público", "Tratamiento necesario para el cumplimiento de una misión de interés público", "Ley 21.719 Art. 16"),
+                ("Interés vital", "Tratamiento necesario para proteger intereses vitales del titular", "Ley 21.719 Art. 17"),
+            ]
+        )
+        print("  ↪ seed: bases_licitud_catalog (6 registros)")
 
     # Migraciones (columnas nuevas añadidas después de la creación inicial)
     try:

@@ -42,6 +42,7 @@ from routes.v1.brechas import router as brechas_v1_router
 from routes.v1.arsop import router as arsop_v1_router
 from routes.v1.dpa import router as dpa_v1_router
 from routes.v1.fases import router as fases_v1_router
+from routes.v1.taxonomia import router as taxonomia_v1_router
 
 from middleware.logging_middleware import setup_logging, RequestLogMiddleware
 
@@ -97,6 +98,7 @@ app.include_router(brechas_v1_router)
 app.include_router(arsop_v1_router)
 app.include_router(dpa_v1_router)
 app.include_router(fases_v1_router)
+app.include_router(taxonomia_v1_router)
 
 # ─── Servir frontend estático (producción) ──────────────────────────────────
 # En producción (Fly.io / Docker), la carpeta static/ contiene el build de React.

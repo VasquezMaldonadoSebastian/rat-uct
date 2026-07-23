@@ -76,6 +76,15 @@ export const api = {
   // DPA / Fases
   generarDpa(encargadoId) { return request(`/dpa/generar/${encargadoId}`, { method: 'POST' }); },
   fases() { return request('/fases'); },
+  // Taxonomía de Datos (Fides)
+  listarCategoriasDatos() { return requestV1('/taxonomia/categorias'); },
+  crearCategoriaDato(data) { return requestV1('/taxonomia/categorias', { method: 'POST', body: JSON.stringify(data) }); },
+  listarFinalidades() { return requestV1('/taxonomia/finalidades'); },
+  crearFinalidad(data) { return requestV1('/taxonomia/finalidades', { method: 'POST', body: JSON.stringify(data) }); },
+  listarBasesLicitud() { return requestV1('/taxonomia/bases'); },
+  crearBaseLicitud(data) { return requestV1('/taxonomia/bases', { method: 'POST', body: JSON.stringify(data) }); },
+  listarAsignaciones(actividadId) { return requestV1(`/taxonomia/asignaciones?actividad_id=${actividadId}`); },
+  crearAsignacion(data) { return requestV1('/taxonomia/asignaciones', { method: 'POST', body: JSON.stringify(data) }); },
 };
 
 export const apiV1 = {
@@ -121,4 +130,8 @@ export const apiV1 = {
   // DPA / Fases
   generarDpa(encargadoId) { return requestV1(`/dpa/generar/${encargadoId}`, { method: 'POST' }); },
   fases() { return requestV1('/fases'); },
+  // Cumplimiento
+  reporteCumplimiento() { return requestV1('/reportes/cumplimiento'); },
+  // Data Flow
+  dataFlow() { return requestV1('/reportes/data-flow'); },
 };

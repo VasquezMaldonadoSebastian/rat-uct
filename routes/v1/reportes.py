@@ -106,3 +106,90 @@ def reporte_score():
         "por_area": [{"area": r[0], "score": round(r[1]), "actividades": r[2]} for r in por_area],
         "por_nivel_riesgo": [{"nivel": r[0], "count": r[1], "score_promedio": round(r[2]) if r[2] else 0} for r in por_riesgo],
     }
+
+
+@router.get("/data-flow")
+def reporte_data_flow():
+    """Data Flow Map: nodos (areas, destinatarios) y enlaces entre ellos."""
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT areas_intervienen, categoria_destinatarios FROM actividades"
+    ).fetchall()
+    conn.close()
+
+    nodos_map = {}
+    enlaces_map = {}
+
+    for area_list, dest_list in rows:
+        areas = area_list or []
+        dests = dest_list or []
+        for a in areas:
+            a_clean = a.strip() if a else ""
+            if a_clean:
+                nodos_map[a_clean] = {"id": a_clean, "nombre": a_clean, "tipo": "area"}
+                for d in dests:
+                    d_clean = d.strip() if d else ""
+                    if d_clean:
+                        nodos_map[d_clean] = {"id": d_clean, "nombre": d_clean, "tipo": "destinatario"}
+                        key = (a_clean, d_clean)
+                        enlaces_map[key] = enlaces_map.get(key, 0) + 1
+
+    return {
+        "nodos": list(nodos_map.values()),
+        "enlaces": [{"source": s, "target": t, "count": c} for (s, t), c in enlaces_map.items()],
+    }
+
+
+@router.get("/cumplimiento")
+def reporte_cumplimiento():
+    """Dashboard ejecutivo de cumplimiento: brechas, EIPD, ARSOP, riesgo y score."""
+    conn = get_connection()
+
+    # 1. Brechas agrupadas por mes (últimos 6 meses)
+    brechas = conn.execute(
+        """SELECT strftime('%Y-%m', created_at) as mes, count(*) as cnt
+           FROM brechas
+           WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '6 months'
+           GROUP BY mes ORDER BY mes"""
+    ).fetchall()
+    brechas_por_mes = [{"mes": r[0], "count": r[1]} for r in brechas]
+
+    # 2. EIPD pendientes (borrador / en_progreso)
+    eipd_pendientes = conn.execute(
+        """SELECT count(*) FROM eipd WHERE estado IN ('borrador', 'en_progreso')"""
+    ).fetchone()[0]
+
+    # 3. EIPD completadas
+    eipd_completadas = conn.execute(
+        """SELECT count(*) FROM eipd WHERE estado = 'completada'"""
+    ).fetchone()[0]
+
+    # 4. ARSOP por estado
+    arsop_rows = conn.execute(
+        """SELECT estado, count(*) as cnt FROM solicitudes_arsop
+           GROUP BY estado"""
+    ).fetchall()
+    arsop_por_estado = dict(arsop_rows) if arsop_rows else {}
+
+    # 5. Actividades por nivel de riesgo
+    riesgo_rows = conn.execute(
+        """SELECT nivel_riesgo, count(*) as cnt FROM actividades
+           GROUP BY nivel_riesgo"""
+    ).fetchall()
+    actividades_por_riesgo = dict(riesgo_rows) if riesgo_rows else {}
+
+    # 6. Score promedio global
+    row = conn.execute(
+        "SELECT avg(score_actividad) FROM actividades WHERE score_actividad IS NOT NULL"
+    ).fetchone()[0]
+    score_promedio = round(row) if row else 0
+
+    conn.close()
+    return {
+        "brechas_por_mes": brechas_por_mes,
+        "eipd_pendientes": eipd_pendientes,
+        "eipd_completadas": eipd_completadas,
+        "arsop_por_estado": arsop_por_estado,
+        "actividades_por_riesgo": actividades_por_riesgo,
+        "score_promedio": score_promedio,
+    }

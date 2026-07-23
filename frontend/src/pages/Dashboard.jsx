@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import CumplimientoPanel from './CumplimientoPanel';
 
 const DAYS_LEFT = 140;
 
@@ -363,6 +364,9 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* ═══ MÉTRICAS DE CUMPLIMIENTO ═══ */}
+      <CumplimientoPanel />
     </div>
   );
 }
