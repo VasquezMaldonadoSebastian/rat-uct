@@ -52,10 +52,10 @@ export const api = {
   // Brechas
   listarBrechas(params) { const q = new URLSearchParams(params||{}); return request(`/brechas?${q}`); },
   crearBrecha(data) { return request('/brechas', { method: 'POST', body: JSON.stringify(data) }); },
-  // ARCOP
-  listarArcop() { return request('/arcop'); },
-  crearArcop(data) { return request('/arcop', { method: 'POST', body: JSON.stringify(data) }); },
-  responderArcop(id, data) { return request(`/arcop/${id}`, { method: 'PUT', body: JSON.stringify(data) }); },
+  // ARSOP
+  listarArsop() { return request('/arsop'); },
+  crearArsop(data) { return request('/arsop', { method: 'POST', body: JSON.stringify(data) }); },
+  responderArsop(id, data) { return request(`/arsop/${id}`, { method: 'PUT', body: JSON.stringify(data) }); },
   // DPA / Fases
   generarDpa(encargadoId) { return request(`/dpa/generar/${encargadoId}`, { method: 'POST' }); },
   fases() { return request('/fases'); },

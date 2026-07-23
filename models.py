@@ -15,7 +15,7 @@ Modelos:
   - EncargadoCreate/Out         — Destinatarios externos
   - EipdCreate/Update/Out       — Evaluación de Impacto (4 pasos)
   - BrechaCreate/Update/Out     — Incidentes de seguridad
-  - ArcopCreate/Update/Out      — Solicitudes ARCOP
+  - ArsopCreate/Update/Out      — Solicitudes ARSOP
 """
 
 from datetime import datetime
@@ -241,16 +241,16 @@ class BrechaOut(BaseModel):
     datos_afectados: str
     titulares_afectados: Optional[int] = None
     medidas_correctivas: str
-    notificado_apdp: bool
-    notificado_titulares: bool
+    notificado_apdp: bool = False
+    notificado_titulares: bool = False
     estado: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
 
-# ─── ARCOP ───────────────────────────────────────────────────────────────────
+# ─── ARSOP ──────────────────────────────────────────────────────────────────
 
-class ArcopCreate(BaseModel):
+class ArsopCreate(BaseModel):
     tipo_derecho: str
     solicitante_nombre: str = ""
     solicitante_email: str = ""
@@ -259,13 +259,13 @@ class ArcopCreate(BaseModel):
     actividad_id: Optional[int] = None
 
 
-class ArcopUpdate(BaseModel):
+class ArsopUpdate(BaseModel):
     estado: Optional[str] = None
     respuesta: Optional[str] = None
     fecha_respuesta: Optional[str] = None
 
 
-class ArcopOut(BaseModel):
+class ArsopOut(BaseModel):
     id: int
     tipo_derecho: str
     solicitante_nombre: str
@@ -276,7 +276,7 @@ class ArcopOut(BaseModel):
     fecha_solicitud: Optional[datetime] = None
     fecha_vencimiento: Optional[str] = None
     estado: str
-    respuesta: str
+    respuesta: str = ""
     fecha_respuesta: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

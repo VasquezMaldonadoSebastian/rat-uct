@@ -5,7 +5,7 @@ import { api } from '../api';
 const TIPOS_DERECHO = ['Acceso', 'Rectificación', 'Cancelación', 'Oposición', 'Portabilidad', 'Bloqueo'];
 const ESTADOS = ['recibida', 'en_estudio', 'respondida', 'rechazada'];
 
-export default function ArcopList() {
+export default function ArsopList() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -13,19 +13,19 @@ export default function ArcopList() {
   const [respondiendo, setRespondiendo] = useState(null);
   const [respuestaText, setRespuestaText] = useState('');
 
-  const load = () => api.listarArcop().then(setSolicitudes).finally(() => setLoading(false));
+  const load = () => api.listarArsop().then(setSolicitudes).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    await api.crearArcop(form);
+    await api.crearArsop(form);
     setShowForm(false);
     setForm({ tipo_derecho: '', solicitante_nombre: '', solicitante_email: '', solicitante_rut: '', descripcion: '' });
     load();
   };
 
   const handleResponder = async (id) => {
-    await api.responderArcop(id, { estado: 'respondida', respuesta: respuestaText, fecha_respuesta: new Date().toISOString().split('T')[0] });
+    await api.responderArsop(id, { estado: 'respondida', respuesta: respuestaText, fecha_respuesta: new Date().toISOString().split('T')[0] });
     setRespondiendo(null);
     setRespuestaText('');
     load();
@@ -35,13 +35,13 @@ export default function ArcopList() {
     <div>
       <div className="page-head">
         <Link to="/" className="back-link">← Dashboard</Link>
-        <h2>👤 Portal ARCOP</h2>
+        <h2>👤 Portal ARSOP</h2>
         <button className="btn btn-pri" onClick={() => setShowForm(true)}>+ Nueva solicitud</button>
       </div>
 
       {showForm && (
         <form onSubmit={handleCreate} className="form-section" style={{ marginBottom: '1.5rem' }}>
-          <h3>Nueva solicitud ARCOP</h3>
+          <h3>Nueva solicitud ARSOP</h3>
           <div className="form-grid">
             <div className="field"><label>Tipo de derecho *</label>
               <select value={form.tipo_derecho} onChange={e => setForm({...form, tipo_derecho: e.target.value})} required>
@@ -62,7 +62,7 @@ export default function ArcopList() {
       )}
 
       {loading ? <div className="loading">Cargando...</div> : solicitudes.length === 0 ? (
-        <div className="empty"><p>No hay solicitudes ARCOP.</p></div>
+        <div className="empty"><p>No hay solicitudes ARSOP.</p></div>
       ) : (
         <div className="table-card">
           <div className="table-header">

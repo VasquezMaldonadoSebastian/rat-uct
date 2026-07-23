@@ -295,8 +295,8 @@ export default function Dashboard() {
             <Link to="/brechas" className="sidebar-item" style={{ marginBottom: '2px' }}>
               <span className="s-icon">🕊️</span> Brechas
             </Link>
-            <Link to="/arcop" className="sidebar-item" style={{ marginBottom: '2px' }}>
-              <span className="s-icon">👤</span> ARCOP
+            <Link to="/arsop" className="sidebar-item" style={{ marginBottom: '2px' }}>
+              <span className="s-icon">👤</span> ARSOP
             </Link>
             <Link to="/actividades/1/eipd" className="sidebar-item">
               <span className="s-icon">🔍</span> EIPD

@@ -8,7 +8,7 @@ import AreasList from './pages/AreasList';
 import Reports from './pages/Reports';
 import EipdWizard from './pages/EipdWizard';
 import BrechasList from './pages/BrechasList';
-import ArcopList from './pages/ArcopList';
+import ArsopList from './pages/ArsopList';
 import './App.css';
 
 export default function App() {
@@ -23,7 +23,7 @@ export default function App() {
           <Route path="/actividades/:id/editar" element={<ActivityForm />} />
           <Route path="/actividades/:id/eipd" element={<EipdWizard />} />
           <Route path="/brechas" element={<BrechasList />} />
-          <Route path="/arcop" element={<ArcopList />} />
+          <Route path="/arsop" element={<ArsopList />} />
           <Route path="/areas" element={<AreasList />} />
           <Route path="/reportes" element={<Reports />} />
         </Routes>

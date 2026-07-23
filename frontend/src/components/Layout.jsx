@@ -4,7 +4,7 @@ const navItems = [
   { icon: '◫', label: 'Dashboard',    path: '/' },
   { icon: '📋', label: 'Actividades',  path: '/actividades' },
   { icon: '🕊️', label: 'Brechas',      path: '/brechas' },
-  { icon: '👤', label: 'ARCOP',        path: '/arcop' },
+  { icon: '👤', label: 'ARSOP',        path: '/arsop' },
   { icon: '⚙',  label: 'Áreas',        path: '/areas' },
   { icon: '📊', label: 'Reportes',     path: '/reportes' },
 ];

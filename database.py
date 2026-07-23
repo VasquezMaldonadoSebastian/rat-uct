@@ -10,7 +10,7 @@ Gestiona la base de datos DuckDB embebida (rat_uct.db) con 8 tablas:
   5. bitacora        — Trazabilidad de cambios (auditoría)
   6. eipd            — Evaluaciones de Impacto (4 pasos)
   7. brechas         — Incidentes de seguridad (alerta 72h)
-  8. solicitudes_arcop — Derechos ARCOP (SLA 30 días)
+  8. solicitudes_arsop — Derechos ARCOP (SLA 30 días)
 
 Basado en la planilla RAT_UCT_v1_Julio_2026.xlsx (15 columnas originales
 + 11 columnas agregadas: riesgo, score, EIPD, brechas, ARCOP, DPA).
@@ -49,7 +49,7 @@ def init_db(conn=None):
       5. bitacora — Trazabilidad de cambios
       6. eipd — Evaluaciones de Impacto (4 pasos)
       7. brechas — Incidentes de seguridad
-      8. solicitudes_arcop — Derechos ARCOP
+      |      8. solicitudes_arsop — Derechos ARSOP
 
     Retorna la conexión DuckDB activa."""
     if conn is None:
@@ -185,7 +185,7 @@ def init_db(conn=None):
 
     # Solicitudes ARCOP
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS solicitudes_arcop (
+        CREATE TABLE IF NOT EXISTS solicitudes_arsop (
             id INTEGER PRIMARY KEY DEFAULT nextval('seq_actividades'),
             tipo_derecho VARCHAR NOT NULL,
             solicitante_nombre VARCHAR,
@@ -214,6 +214,12 @@ def init_db(conn=None):
     try:
         conn.execute("ALTER TABLE actividades ADD COLUMN score_actividad INTEGER DEFAULT NULL")
         print("  ↪ migración: score_actividad agregada")
+    except Exception:
+        pass
+    # Migración: solicitudes_arcop → solicitudes_arsop
+    try:
+        conn.execute("ALTER TABLE solicitudes_arcop RENAME TO solicitudes_arsop")
+        print("  ↪ migración: solicitudes_arcop → solicitudes_arsop")
     except Exception:
         pass
     return conn
