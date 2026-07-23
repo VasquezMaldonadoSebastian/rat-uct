@@ -1,0 +1,13 @@
+{
+    "actividad_tratamiento": "Gestion de matricula estudiantil",
+    "finalidad": "Formalizar la incorporacion del estudiante y habilitar su trayectoria formativa",
+    "descripcion": "El estudiante completa formulario web o presencial, admision valida antecedentes, registro crea la ficha academica",
+    "areas_intervienen": ["Admision", "Finanzas", "TI"],
+    "categoria_titulares": ["Estudiantes", "Prospectos"],
+    "categorias_datos": ["Identificacion (nombre, RUT)", "Contacto (email, telefono)", "Academicos (notas)"],
+    "origen_fuente": "Formulario completado por el estudiante, certificados de otras instituciones",
+    "categoria_destinatarios": ["Registro Academico", "Finanzas", "Mineduc"],
+    "base_licitud": "Ejecucion de un contrato",
+    "plazo_conservacion": "10 anos desde ultimo registro academico",
+    "medidas_seguridad": "Acceso por credenciales, cifrado en transito, canales autenticados"
+}

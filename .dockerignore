@@ -1,0 +1,12 @@
+node_modules/
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+.hermes/
+.git/
+*.db
+rat_uct.db
+mockup-rat-uct.html
+memoria_proy.md
+test_data.json
