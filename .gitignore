@@ -4,3 +4,17 @@ __pycache__/
 *.xlsx
 static/assets/
 node_modules/
+
+# ── Archivos locales de trabajo (NO se suben a GitHub) ──────────────
+memoria_proy.md
+.hermes/
+docs/plan-accion.md
+mockup-rat-uct.html
+main.py
+logo_rat_uct.png
+seed_demo.py
+static/
+scripts/
+docs/manual-usuario.html
+docs/manual-usuario.pdf
+docs/manual-imgs/
