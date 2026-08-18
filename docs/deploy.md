@@ -1,7 +1,8 @@
 # Guía de Despliegue — RAT UCT
 
 > **Proyecto:** Registro de Actividades de Tratamiento — Universidad Católica de Temuco
-> **Versión:** 1.0.0 | **Fecha:** Julio 2026
+> **Versión:** 1.1.0 | **Fecha:** Julio 2026
+> **Deploy en producción:** Fly.io → `https://rat-uct.fly.dev`
 
 ---
 
@@ -16,7 +17,7 @@
 | npm | ≥ 9 | Incluido con Node.js |
 | Git | — | Control de versiones |
 
-### Producción (Render / Fly.io / Docker)
+### Producción (Fly.io / Docker / Render)
 
 | Recurso | Mínimo | Recomendado |
 |---------|--------|-------------|
@@ -29,16 +30,52 @@ DuckDB es extremadamente liviano; no requiere servidor de base de datos ni confi
 
 ---
 
-## 2. Despliegue en Render
+## 2. Despliegue en Fly.io (producción real)
+
+El proyecto se desplegó en **Fly.io** como Web Service con Docker. Configuración en `fly.toml` + `Dockerfile` multi-stage.
+
+### 2.1 Build y deploy
+
+```bash
+# Build de la imagen local
+docker build -t rat-uct:latest .
+
+# Deploy a Fly.io
+flyctl deploy --local-only --image rat-uct:latest
+```
+
+### 2.2 Configuración (fly.toml)
+
+| Campo | Valor |
+|-------|-------|
+| **App** | `rat-uct` |
+| **Internal port** | `8080` |
+| **Puertos públicos** | 443 (TLS/HTTP) + 80 (HTTP) |
+| **Health check** | `GET /api/actividades/total` (cada 15s) |
+| **Volumen** | `rat_uct_data` → `/data` (1 GB, persistente para DuckDB) |
+| **Env `DB_PATH`** | `/data/rat_uct.db` |
+
+### 2.3 Variables de Entorno
+
+| Variable | Descripción | Valor |
+|----------|-------------|-------|
+| `PORT` | Puerto del servidor | `8080` |
+| `DB_PATH` | Ruta de la base DuckDB | `/data/rat_uct.db` |
+
+> **Nota:** El volumen montado en `/data` garantiza la persistencia de la base entre redeploys. El `Dockerfile` incluye un seed idempotente (`python seed.py`) que solo siembra datos si la base está vacía.
+
+---
+
+## 3. Despliegue alternativo en Render
 
 El proyecto está configurado para desplegarse en **Render** como Web Service. Sigue estos pasos:
 
-### 2.1 Preparación
+### 3.1 Preparación
 
 1. **Crear cuenta en [Render](https://render.com)**
 2. **Conectar repositorio GitHub** con el proyecto RAT UCT
 
-### 2.2 Configuración del Web Service
+### 3.3 Configuración del Web Service
 
 | Campo | Valor |
 |-------|-------|
@@ -47,7 +84,7 @@ El proyecto está configurado para desplegarse en **Render** como Web Service. S
 | **Start Command** | `uvicorn app:app --host 0.0.0.0 --port $PORT` |
 | **Plan** | Free (Starter) o superior |
 
-### 2.3 Variables de Entorno
+### 3.3 Variables de Entorno
 
 | Variable | Valor | Propósito |
 |----------|-------|-----------|
@@ -59,7 +96,7 @@ El proyecto está configurado para desplegarse en **Render** como Web Service. S
 > - Subir/bajar el archivo `.db` manualmente desde la consola de Render
 > - Migrar a PostgreSQL si la persistencia es crítica
 
-### 2.4 Frontend Build
+### 3.4 Frontend Build
 
 Render no tiene un paso separado para el build del frontend. Hay dos opciones:
 
@@ -81,7 +118,7 @@ Si usas Render con Docker runtime, el `Dockerfile` incluido construye automátic
 
 ---
 
-## 3. Build del Frontend
+## 4. Build del Frontend
 
 El frontend React se construye con Vite. El build de producción se sirve desde la carpeta `static/` en la raíz del proyecto.
 
@@ -141,7 +178,7 @@ ruff format .  # Formateo
 
 ---
 
-## 4. Variables de Entorno
+## 5. Variables de Entorno
 
 ### `DB_PATH`
 
@@ -167,7 +204,7 @@ DB_PATH = Path(os.environ.get("DB_PATH", str(Path(__file__).parent / "rat_uct.db
 
 ---
 
-## 5. Docker
+## 6. Docker
 
 ### 5.1 Dockerfile Existente
 
@@ -196,7 +233,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Backend code
-COPY main.py database.py models.py seed.py ./
+COPY app.py database.py models.py seed.py ./
 COPY RAT_UCT_v1_Julio_2026.xlsx ./
 
 # Frontend build
@@ -207,10 +244,10 @@ RUN mkdir -p /data
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "python seed.py && uvicorn main:app --host 0.0.0.0 --port 8080"]
+CMD ["sh", "-c", "python seed.py && uvicorn app:app --host 0.0.0.0 --port 8080"]
 ```
 
-> **Importante:** El Dockerfile actual apunta a `main:app` (versión monolítica original). Si usas la versión modularizada, cambia el CMD a `uvicorn app:app --host 0.0.0.0 --port 8080`.
+> **Importante:** El `Dockerfile` es multi-stage de 3 fases: (1) build del frontend React, (2) pre-seed de la base DuckDB con `seed.py`, y (3) imagen runtime con `app:app` (versión modularizada). Es idempotente: `seed.py` salta si la base ya tiene datos.
 
 ### 5.2 Build y Ejecución Local
 
@@ -248,7 +285,7 @@ services:
 
 ---
 
-## 6. Tailscale para Acceso Remoto
+## 7. Tailscale para Acceso Remoto
 
 Tailscale permite acceder al RAT UCT de forma segura desde cualquier lugar sin exponer puertos a internet.
 
@@ -283,7 +320,7 @@ curl http://100.x.y.z:8000/api/actividades/total
 
 ---
 
-## 7. Comandos de Verificación Post-Deploy
+## 8. Comandos de Verificación Post-Deploy
 
 ### 7.1 Health Check Básico
 
@@ -378,7 +415,7 @@ conn.close()
 
 ---
 
-## 8. Checklist de Despliegue
+## 9. Checklist de Despliegue
 
 | # | Paso | Comando/Verificación |
 |---|------|----------------------|
@@ -395,7 +432,7 @@ conn.close()
 
 ---
 
-## 9. Solución de Problemas
+## 10. Solución de Problemas
 
 ### Error: `duckdb.duckdb.CatalogException: Table with name actividades already exists`
 
@@ -442,7 +479,7 @@ Si el frontend Vite no puede conectar al backend:
 
 ---
 
-## 10. Mantenimiento
+## 11. Mantenimiento
 
 ### Respaldo de Base de Datos
 

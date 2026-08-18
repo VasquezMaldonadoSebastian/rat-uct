@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from database import get_connection, init_db, seed_areas_uct
 from routes.actividades import router as actividades_router
@@ -101,11 +101,23 @@ app.include_router(fases_v1_router)
 app.include_router(taxonomia_v1_router)
 
 # ─── Servir frontend estático (producción) ──────────────────────────────────
-# En producción (Fly.io / Docker), la carpeta static/ contiene el build de React.
-# FastAPI sirve la SPA después de todas las rutas API registradas.
+# FastAPI sirve la SPA con catch-all para routing de React (BrowserRouter).
 _static_dir = os.path.join(os.path.dirname(__file__), "static")
-if os.path.isdir(_static_dir):
-    app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
+_index_path = os.path.join(_static_dir, "index.html")
+
+
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    # Pasar las rutas API a FastAPI
+    if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi"):
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"error": "not found"}, status_code=404)
+    # Servir archivo estático si existe
+    file_path = os.path.join(_static_dir, full_path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    # SPA catch-all: servir index.html para cualquier otra ruta
+    return FileResponse(_index_path)
 
 
 if __name__ == "__main__":
