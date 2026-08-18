@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY seed.py RAT_UCT_v1_Julio_2026.xlsx ./
+COPY seed.py database.py RAT_UCT_v1_Julio_2026.xlsx ./
 RUN python seed.py
 
 # ─── Stage 3: Runtime image ──────────────────────────────────────────────────
@@ -40,6 +40,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ── Backend code (archivos específicos, sin wildcards) ──
 COPY app.py utils.py database.py models.py seed.py ./
 COPY routes/ ./routes/
+COPY middleware/ ./middleware/
 
 # ── Frontend build ──
 COPY --from=frontend-builder /app/frontend/dist ./static
@@ -54,7 +55,8 @@ COPY RAT_UCT_v1_Julio_2026.xlsx ./
 RUN mkdir -p /data
 
 # ── Non-root user ──
-RUN adduser --system --disabled-password --no-create-home appuser && \
+RUN addgroup --system appuser && \
+    adduser --system --ingroup appuser --disabled-password --no-create-home appuser && \
     chown -R appuser:appuser /app /data
 
 USER appuser
